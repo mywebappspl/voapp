@@ -1,0 +1,1 @@
+alter table messages drop column member_id;

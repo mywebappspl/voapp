@@ -1,0 +1,33 @@
+spring:
+  jpa:
+    show-sql: true
+  datasource:
+    url: 'jdbc:mysql://databasebaseurl/virtualoffice'
+    username: dbname
+    password: dbpassword
+  jpa.hibernate:
+    ddl-auto: validate
+  flyway:
+    enabled: false
+  rabbitmq:
+    addresses: 'amqps://rabbitmqurl'
+keycloak:
+  realm: realmname
+  auth-server-url: usebaseurl
+  ssl-required: external
+  resource: clientname
+  credentials:
+    secret: secretpassword
+  bearer-only: true
+  use-resource-role-mappings: false
+  enabled: true
+keycloakrestclient:
+  admingroup: admingIdFromKeycloak
+  usergroup: userIdFromKeycloak
+  baseurl: https://keycloakbaseurl/admin/realms/
+  realm: realm
+  clientid: clientid
+  clientsecret: clientsecret
+  granttype: client_credentials
+  tokenurl: https://keycloakbaseurl/realms/yourrealm/protocol/openid-connect/token
+
