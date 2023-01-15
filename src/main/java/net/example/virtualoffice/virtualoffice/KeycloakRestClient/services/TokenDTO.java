@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-class TokenPOJO{
+class TokenDTO {
     private String access_token;
     private int expires_in;
     private int refresh_expires_in;
@@ -15,8 +15,8 @@ class TokenPOJO{
     private int not_before_policy;
     private String scope;
     private int statusCode;
-    TokenPOJO(){}
-    TokenPOJO(int status)
+    TokenDTO(){}
+    TokenDTO(int status)
     {
         this.statusCode=status;
     }

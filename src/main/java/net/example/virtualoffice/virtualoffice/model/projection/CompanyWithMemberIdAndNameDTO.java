@@ -19,7 +19,7 @@ public class CompanyWithMemberIdAndNameDTO {
     public CompanyWithMemberIdAndNameDTO(Company company)
     {
         this.companyId=company.getId();
-        this.companyName=company.getCompany_name();
+        this.companyName=company.getCompanyName();
 
         this.members=company.getMembers().stream()
                 .filter(m->m.isActive()==true)

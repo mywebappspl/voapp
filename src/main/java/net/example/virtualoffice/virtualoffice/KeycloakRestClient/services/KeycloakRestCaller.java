@@ -29,26 +29,26 @@ public class KeycloakRestCaller {
     protected String tokenUrl;
     RestTemplate restTemplate = new RestTemplate();
 
-    private HttpHeaders HeaderBuilder(String accessToken)
+    private HttpHeaders headerBuilder(String accessToken)
     {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer "+accessToken);
         return headers;
     }
-    private String UrlSetup(String cmd){
+    private String urlSetup(String cmd){
         return baseUrl+realm+'/'+cmd;
     }
-    private HttpEntity<?> BuildEntity(Object data, String accessToken){
-        return new HttpEntity<>(data,HeaderBuilder(accessToken));
+    private HttpEntity<?> buildEntity(Object data, String accessToken){
+        return new HttpEntity<>(data,headerBuilder(accessToken));
     }
-    protected ResponseEntity<String> FetchData(String cmd)
+    protected ResponseEntity<String> fetchData(String cmd)
     {
         String url=baseUrl+realm+'/'+cmd;
-        TokenPOJO accessToken = ObtainToken();
+        TokenDTO accessToken = obtainToken();
         if(accessToken.getStatusCode()==200) {
             try{
-                return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<String>(HeaderBuilder(accessToken.getAccess_token())), String.class);
+                return restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<String>(headerBuilder(accessToken.getAccess_token())), String.class);
             }
             catch (HttpClientErrorException e)
             {
@@ -58,11 +58,11 @@ public class KeycloakRestCaller {
             throw new ServerExceptions(Exceptions.STATUS_TOKEN_ERROR);
         }
     }
-    protected ResponseEntity<String> SaveData(String cmd, KeycloakSaveUserToRestDTO data){
+    protected ResponseEntity<String> saveData(String cmd, KeycloakSaveUserToRestDTO data){
         String url=baseUrl+realm+'/'+cmd;
-        TokenPOJO accessToken = ObtainToken();
+        TokenDTO accessToken = obtainToken();
         if(accessToken.getStatusCode()==200) {
-            HttpEntity<KeycloakSaveUserToRestDTO> entity = new HttpEntity<>(data,HeaderBuilder(accessToken.getAccess_token()));
+            HttpEntity<KeycloakSaveUserToRestDTO> entity = new HttpEntity<>(data,headerBuilder(accessToken.getAccess_token()));
             try {
                 return restTemplate.postForEntity(url,entity, String.class);
             }
@@ -74,12 +74,12 @@ public class KeycloakRestCaller {
             throw new ServerExceptions(Exceptions.STATUS_TOKEN_ERROR);
         }
     }
-    protected ResponseEntity<String> PutData(String cmd, Object data) {
-        TokenPOJO accessToken = ObtainToken();
+    protected ResponseEntity<String> putData(String cmd, Object data) {
+        TokenDTO accessToken = obtainToken();
         if(accessToken.getStatusCode()==200) {
             //HttpEntity<?> entity = new HttpEntity<>(data,HeaderBuilder(accessToken.getAccess_token()));
             try {
-                restTemplate.put(UrlSetup(cmd),BuildEntity(data,accessToken.getAccess_token()));
+                restTemplate.put(urlSetup(cmd),buildEntity(data,accessToken.getAccess_token()));
                 return ResponseEntity.accepted().build();
             }
             catch (HttpClientErrorException e)
@@ -90,11 +90,11 @@ public class KeycloakRestCaller {
             throw new ServerExceptions(Exceptions.STATUS_TOKEN_ERROR);
         }
     }
-    protected ResponseEntity<String> DeleteData(String cmd) {
-        TokenPOJO accessToken = ObtainToken();
+    protected ResponseEntity<String> deleteData(String cmd) {
+        TokenDTO accessToken = obtainToken();
         if(accessToken.getStatusCode()==200) {
             try {
-                return restTemplate.exchange(UrlSetup(cmd),HttpMethod.DELETE,new HttpEntity(HeaderBuilder(accessToken.getAccess_token())),String.class);
+                return restTemplate.exchange(urlSetup(cmd),HttpMethod.DELETE,new HttpEntity(headerBuilder(accessToken.getAccess_token())),String.class);
             }
             catch (HttpClientErrorException e)
             {
@@ -104,7 +104,7 @@ public class KeycloakRestCaller {
             throw new ServerExceptions(Exceptions.STATUS_TOKEN_ERROR);
         }
     }
-    private TokenPOJO ObtainToken()
+    private TokenDTO obtainToken()
     {
         try {
         String url=tokenUrl;
@@ -119,16 +119,16 @@ public class KeycloakRestCaller {
         ObjectMapper mapper = new ObjectMapper();
 
         String json=response.getBody();
-            TokenPOJO token = mapper.readValue(json, TokenPOJO.class);
+            TokenDTO token = mapper.readValue(json, TokenDTO.class);
             token.setStatusCode(200);
             return token;
         }
         catch (JsonMappingException e) {
-            return new TokenPOJO(500);
+            return new TokenDTO(500);
         }
         catch (Exception e)
         {
-            return new TokenPOJO(500);
+            return new TokenDTO(500);
         }
     }
 }

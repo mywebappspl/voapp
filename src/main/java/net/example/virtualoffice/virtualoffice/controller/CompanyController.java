@@ -42,7 +42,7 @@ class CompanyController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void UpdateCompany(@PathVariable int id, @Valid @RequestBody final Company company) {
+    public void updateCompany(@PathVariable int id, @Valid @RequestBody final Company company) {
         companyService.UpdateCompanyService(id, company);
     }
 
@@ -91,7 +91,7 @@ class CompanyController {
     }
 
     @GetMapping("{id}/members")
-    public CompanyWithMemberIdAndNameDTO SimplyCompanyInfoWithMemberIdAndName(@PathVariable int id) {
+    public CompanyWithMemberIdAndNameDTO simplyCompanyInfoWithMemberIdAndName(@PathVariable int id) {
         return companyService.SimplyCompanyInfoWithMemberIdAndName(id);
     }
 

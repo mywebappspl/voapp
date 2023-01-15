@@ -7,20 +7,18 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.KeycloakRestClient;
-import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.BadRequestException;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.Exceptions;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.ServerExceptions;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.projection.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import pl.strefaphp.virtualoffice.virtualoffice.KeycloakRestClient.projection.*;
+
 
 import java.util.List;
 
 
 @Component
-
 public class KeycloakRestClientImpl extends KeycloakRestCaller implements KeycloakRestClient {
     KeycloakReadUserFromRestDTO keycloakReadUserFromRestDTO;
     KeycloakSaveUserToRestDTO keycloakSaveUserToRestDTO;
@@ -28,8 +26,6 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
     AdminStateUpdateToRest adminStateUpdateToRest;
     @Value("${keycloakrestclient.admingroup}")
     protected String adming;
-    @Value("${keycloakrestclient.usergroup}")
-    protected String userg;
 
     KeycloakRestClientImpl(final KeycloakReadUserFromRestDTO keycloakReadUserFromRestDTO, final KeycloakSaveUserToRestDTO keycloakSaveUserToRestDTO, final KeycloakNewPasswordDTO keycloakNewPasswordDTO, final AdminStateUpdateToRest adminStateUpdateToRest) {
         this.keycloakReadUserFromRestDTO = keycloakReadUserFromRestDTO;
@@ -39,8 +35,8 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
     }
 
     @Override
-    public List<KeycloakReadUserFromRestDTO> GetAgents() {
-        ResponseEntity<String> res = FetchData("/users");
+    public List<KeycloakReadUserFromRestDTO> getAgentsService() {
+        ResponseEntity<String> res = fetchData("/users");
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             return mapper.readValue(res.getBody(), mapper.getTypeFactory().constructCollectionType(List.class, KeycloakReadUserFromRestDTO.class));
@@ -52,8 +48,8 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
     }
 
     @Override
-    public KeycloakReadUserFromRestDTO GetSingleAgent(final String id) {
-        ResponseEntity<String> res = FetchData("/users/" + id);
+    public KeycloakReadUserFromRestDTO getSingleAgentService(final String id) {
+        ResponseEntity<String> res = fetchData("/users/" + id);
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             return mapper.readValue(res.getBody(), KeycloakReadUserFromRestDTO.class);
@@ -65,48 +61,42 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
     }
 
     @Override
-    public ResponseEntity<String> AddAgent(final KeycloakRestInputUserFromControllerDTO keycloakRestInputUserFromControllerDTO) {
+    public ResponseEntity<String> addAgentService(final KeycloakRestInputUserFromControllerDTO keycloakRestInputUserFromControllerDTO) {
         keycloakRestInputUserFromControllerDTO.setEnabled("true");
         KeycloakSaveUserToRestDTO data = keycloakSaveUserToRestDTO.ToSave(keycloakRestInputUserFromControllerDTO);
-        return SaveData("users", data);
+        return saveData("users", data);
     }
 
     @Override
-    public ResponseEntity<String> ChangePassword(final String uid, final KeycloakNewPasswordInput keycloakNewPasswordInput) {
+    public ResponseEntity<String> changePasswordService(final String uid, final KeycloakNewPasswordInput keycloakNewPasswordInput) {
         keycloakNewPasswordDTO.ToSave(keycloakNewPasswordInput.getValue());
-        return PutData("users/" + uid + "/reset-password", keycloakNewPasswordDTO);
+        return putData("users/" + uid + "/reset-password", keycloakNewPasswordDTO);
     }
 
     @SneakyThrows
     @Override
-    public ResponseEntity<String> UpdateAgent(final String uid, final KeycloakRestUpdateAgent keycloakRestUpdateAgent) {
-        if (keycloakRestUpdateAgent.getEmail().equals(null))
-            throw new BadRequestException(Exceptions.AGENT_EMAIL_NOT_EMPTY_BAD_REQUEST);
-        if (keycloakRestUpdateAgent.getLastName().equals(null))
-            throw new BadRequestException(Exceptions.AGENT_LASTNME_NOT_EMPTY_REQUEST);
-        if (keycloakRestUpdateAgent.getFirstName().equals(null))
-            throw new BadRequestException(Exceptions.AGENT_FIRSTNAME_NOT_EMPTY_BAD_REQUEST);
-        return PutData("users/" + uid, keycloakRestUpdateAgent);
+    public ResponseEntity<String> updateAgentService(final String uid, final KeycloakRestUpdateAgent keycloakRestUpdateAgent) {
+        return putData("users/" + uid, keycloakRestUpdateAgent);
     }
 
     @Override
-    public ResponseEntity<String> AgentStatus(final String uid, final KeycloakRestSetStatus keycloakRestSetStatus) {
-        return PutData("users/" + uid, keycloakRestSetStatus);
+    public ResponseEntity<String> agentStatusService(final String uid, final KeycloakRestSetStatus keycloakRestSetStatus) {
+        return putData("users/" + uid, keycloakRestSetStatus);
     }
 
     @Override
-    public ResponseEntity<String> AgentGroupUpdate(final String uid, final AdminStateSetFromInput adminStateSetFromInput) {
+    public ResponseEntity<String> agentGroupUpdateService(final String uid, final AdminStateSetFromInput adminStateSetFromInput) {
 
         if (!adminStateSetFromInput.isState()) {
-            return DeleteData("users/" + uid + "/groups/" + adming);
+            return deleteData("users/" + uid + "/groups/" + adming);
         } else {
-            return PutData("users/" + uid + "/groups/" + adming, null);
+            return putData("users/" + uid + "/groups/" + adming, null);
         }
     }
     @Override
-    public AdminStateSetFromInput AgentGroupFetch(final String uid)
+    public AdminStateSetFromInput agentGroupFetchService(final String uid)
     {
-        ResponseEntity<String> res = FetchData("/users/" + uid + "/groups");
+        ResponseEntity<String> res = fetchData("/users/" + uid + "/groups");
         String noArray = res.getBody().substring(1,res.getBody().length()-1);
         AdminStateSetFromInput groupState = new AdminStateSetFromInput();
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

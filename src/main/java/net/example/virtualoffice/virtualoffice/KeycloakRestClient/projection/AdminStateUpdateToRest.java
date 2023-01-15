@@ -9,10 +9,4 @@ import org.springframework.stereotype.Component;
 @Setter
 public class AdminStateUpdateToRest {
     private String[] groups;
-    public AdminStateUpdateToRest ToRest(String group)
-    {
-        this.groups=new String[]{group};
-        return this;
-    }
-
 }

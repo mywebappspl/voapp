@@ -8,11 +8,11 @@ import net.example.virtualoffice.virtualoffice.model.Company;
 @Setter
 public class ReadBasicCompanyDTO {
     private int id;
-    private String company_name;
+    private String companyName;
     private boolean active;
     public ReadBasicCompanyDTO(final Company source) {
         this.id= source.getId();
-        this.company_name=source.getCompany_name();
+        this.companyName=source.getCompanyName();
         this.active=source.isActive();
     }
 }

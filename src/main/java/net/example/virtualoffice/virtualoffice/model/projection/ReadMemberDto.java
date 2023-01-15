@@ -1,14 +1,16 @@
 package net.example.virtualoffice.virtualoffice.model.projection;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.example.virtualoffice.virtualoffice.model.Member;
-
+@Getter
+@Setter
 public class ReadMemberDto {
-    private int id;
-    private String name;
-    private String phone;
-    private String email;
-    private boolean active;
-    private int companyId;
+    private final int id;
+    private final String name;
+    private final String phone;
+    private final String email;
+    private final boolean active;
 
     public ReadMemberDto(final Member source) {
         this.id=source.getId();
@@ -17,25 +19,5 @@ public class ReadMemberDto {
         this.phone= source.getPhone();
         this.active= source.isActive();
 
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public boolean isActive() {
-        return active;
     }
 }

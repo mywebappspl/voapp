@@ -21,7 +21,7 @@ public class Company {
     private int id;
     @NotBlank(message="Company name cannot be empty")
     @Column(unique = true)
-    private String company_name;
+    private String companyName;
     @NotBlank(message = "Phone number cannot be empty")
     private String phone;
     @Email(message="Invalid email address")
@@ -32,5 +32,4 @@ public class Company {
    // @NotNull(message="minimum one member needs to be added")
     private Set<Member> members;
     private boolean active;
-
 }

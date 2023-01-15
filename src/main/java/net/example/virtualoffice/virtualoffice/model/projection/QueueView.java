@@ -11,13 +11,13 @@ import java.util.Date;
 @Setter
 public class QueueView {
     private int id;
-    private int message_id;
+    private int messageId;
     private String fromName;
-    private int company_id;
+    private int companyId;
     private String name;
     private String email;
-    private String msg_status;
-    private LocalDateTime queued_on;
+    private String msgStatus;
+    private LocalDateTime queuedOn;
     private String readStatus(int statusId)
     {
         return switch (statusId) {
@@ -29,15 +29,15 @@ public class QueueView {
             default -> "Undefined";
         };
     }
-    public QueueView(final int id, final int message_id, final String fromName, final int company_id, final String name, final String email, final int msg_status, final Date queued_on) {
+    public QueueView(final int id, final int messageId, final String fromName, final int companyId, final String name, final String email, final int msgStatus, final Date queuedOn) {
         this.id=id;
-        this.message_id = message_id;
+        this.messageId = messageId;
         this.fromName = fromName;
-        this.company_id = company_id;
+        this.companyId = companyId;
         this.name = name;
         this.email = email;
-        this.msg_status = readStatus(msg_status);
-        this.queued_on = voutils.convertToLocalDateTimeViaInstant(queued_on);
+        this.msgStatus = readStatus(msgStatus);
+        this.queuedOn = voutils.convertToLocalDateTimeViaInstant(queuedOn);
 
     }
 }

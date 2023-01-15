@@ -8,16 +8,16 @@ import java.time.LocalDateTime;
 @Setter
 public class ReadLogItem {
     private int id;
-    private LocalDateTime created_on;
+    private LocalDateTime createdOn;
     private String message;
-    private int agent_id;
-    private int company_id;
+    private int agentId;
+    private int companyId;
 
-    public ReadLogItem(final int id, final LocalDateTime created_on, final String message, final int agent_id, final int company_id) {
+    public ReadLogItem(final int id, final LocalDateTime createdOn, final String message, final int agentId, final int companyId) {
         this.id = id;
-        this.created_on = created_on;
+        this.createdOn = createdOn;
         this.message = message;
-        this.agent_id = agent_id;
-        this.company_id = company_id;
+        this.agentId = agentId;
+        this.companyId = companyId;
     }
 }

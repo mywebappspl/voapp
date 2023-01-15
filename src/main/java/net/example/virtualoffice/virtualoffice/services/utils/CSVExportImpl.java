@@ -36,7 +36,7 @@ public class CSVExportImpl implements CSVExport {
             for (ReadCompanyMessageForExport msg : messagesToExport) {
                 csvPrinter.printRecord(
                         msg.getCreated_on(),
-                        msg.getMember_name(),
+                        msg.getMemberName(),
                         msg.getFromName(),
                         msg.getFromEmail(),
                         msg.getFromPhone(),

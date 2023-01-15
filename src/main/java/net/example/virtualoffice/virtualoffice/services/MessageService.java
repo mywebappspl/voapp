@@ -17,7 +17,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import pl.strefaphp.virtualoffice.virtualoffice.model.projection.*;
 
 import java.util.Date;
 import java.util.List;

@@ -15,8 +15,8 @@ import net.example.virtualoffice.virtualoffice.services.MemberService;
 @CrossOrigin
 @RequestMapping("/member")
 class MemberController {
-    private MembersRepository membersRepository;
-    private MemberService memberService;
+    private final MembersRepository membersRepository;
+    private final MemberService memberService;
     MemberController(final MembersRepository membersRepository, final MemberService memberService) {
         this.membersRepository = membersRepository;
         this.memberService=memberService;

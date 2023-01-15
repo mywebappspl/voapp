@@ -6,7 +6,6 @@ import net.example.virtualoffice.virtualoffice.model.Member;
 import net.example.virtualoffice.virtualoffice.model.TakenFor;
 import net.example.virtualoffice.virtualoffice.repository.MembersRepository;
 import net.example.virtualoffice.virtualoffice.repository.TakenForRepository;
-import net.example.virtualoffice.virtualoffice.services.MessagesForLogs.LogMessages;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,11 @@ import net.example.virtualoffice.virtualoffice.model.projection.ReadMemberMessge
 public class MemberService {
     private final MembersRepository membersRepository;
     private final TakenForRepository takenForRepository;
-    private final LogService logService;
 
-    MemberService(final MembersRepository membersRepository, final TakenForRepository takenForRepository, final LogService logService) {
+
+    MemberService(final MembersRepository membersRepository, final TakenForRepository takenForRepository) {
         this.membersRepository = membersRepository;
         this.takenForRepository = takenForRepository;
-        this.logService = logService;
     }
 
     private boolean IsMemberNameExists(String name, int companyId) {
@@ -38,10 +36,6 @@ public class MemberService {
             member.setActive(true);
             member.setCompany_id(companyId);
             Member result = membersRepository.save(member);
-            logService.addAgentId(1);
-            logService.addCompanyId(member.getCompany_id());
-            logService.addMemberName(member.getName());
-            logService.SaveLog(LogMessages.USER_IN_COMPANY_CREATED);
             return new ReadMemberDto(result);
         } else {
             throw new MemberExceptionHandler("In company ID: " + member.getCompany_id() + "member " + member.getName() + " already exists");

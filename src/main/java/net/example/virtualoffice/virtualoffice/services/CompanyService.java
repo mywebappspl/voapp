@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.strefaphp.virtualoffice.virtualoffice.model.projection.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -59,9 +58,9 @@ public class CompanyService {
 
     @Transactional
     public Company createCompany(Company source) {
-        if (isCompanyNameExists(source.getCompany_name())) {
+        if (isCompanyNameExists(source.getCompanyName())) {
             Company company = new Company();
-            company.setCompany_name(source.getCompany_name());
+            company.setCompanyName(source.getCompanyName());
             company.setPhone(source.getPhone());
             company.setEmail(source.getEmail());
             company.setActive(true);
@@ -123,10 +122,10 @@ public class CompanyService {
 
     @Transactional
     public void UpdateCompanyService(int id, Company company) {
-        if (isCompanyNameExists(company.getCompany_name())) {
+        if (isCompanyNameExists(company.getCompanyName())) {
             companiesRepository.findById(id)
                     .map(cmp -> {
-                        cmp.setCompany_name(company.getCompany_name());
+                        cmp.setCompanyName(company.getCompanyName());
                         cmp.setEmail(company.getEmail());
                         cmp.setPhone(company.getPhone());
                         cmp.setActive(company.isActive());
