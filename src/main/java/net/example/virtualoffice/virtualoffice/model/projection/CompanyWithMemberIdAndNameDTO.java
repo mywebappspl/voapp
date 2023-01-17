@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 public class CompanyWithMemberIdAndNameDTO {
     private int companyId;
     private String companyName;
-
-
     private List<MemberIdAndNameDTO> members;
 
     public CompanyWithMemberIdAndNameDTO(Company company)

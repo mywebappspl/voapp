@@ -2,10 +2,12 @@ package net.example.virtualoffice.virtualoffice.KeycloakRestClient.services;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 class TokenDTO {
     private String access_token;
     private int expires_in;
@@ -15,7 +17,6 @@ class TokenDTO {
     private int not_before_policy;
     private String scope;
     private int statusCode;
-    TokenDTO(){}
     TokenDTO(int status)
     {
         this.statusCode=status;

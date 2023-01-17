@@ -1,13 +1,14 @@
 package net.example.virtualoffice.virtualoffice.services;
 
-import net.example.virtualoffice.virtualoffice.exception.MemberExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.MemberNameNotExceptionHandler;
+import net.example.virtualoffice.virtualoffice.exception.CustomExceptionHandler;
+import net.example.virtualoffice.virtualoffice.exception.ExceptionMessages;
 import net.example.virtualoffice.virtualoffice.model.Member;
 import net.example.virtualoffice.virtualoffice.model.TakenFor;
 import net.example.virtualoffice.virtualoffice.repository.MembersRepository;
 import net.example.virtualoffice.virtualoffice.repository.TakenForRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import net.example.virtualoffice.virtualoffice.model.projection.MemberStatus;
@@ -34,11 +35,11 @@ public class MemberService {
     public ReadMemberDto createMember(int companyId, Member member) {
         if (!IsMemberNameExists(member.getName(), companyId)) {
             member.setActive(true);
-            member.setCompany_id(companyId);
+            member.setCompanyId(companyId);
             Member result = membersRepository.save(member);
             return new ReadMemberDto(result);
         } else {
-            throw new MemberExceptionHandler("In company ID: " + member.getCompany_id() + "member " + member.getName() + " already exists");
+            throw new CustomExceptionHandler(ExceptionMessages.MEMBER_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -50,20 +51,19 @@ public class MemberService {
                     m.setName(member.getName());
                     m.setPhone(member.getPhone());
                     m.setEmail(member.getEmail());
-                    m.setCompany_id(companyId);
+                    m.setCompanyId(companyId);
                     return membersRepository.save(m);
 
-                }).orElseThrow(() -> new MemberNameNotExceptionHandler(" company id " + member.getCompany_id()));
-
+                }).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.MEMBER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND));
     }
 
     public ReadMemberMessgesDTO readMessagesForMember(int id, Pageable pageable) {
-        Page<TakenFor> result = takenForRepository.findAllByMember_Id(id, pageable);
+        Page<TakenFor> result = takenForRepository.findAllByMemberId(id, pageable);
         return new ReadMemberMessgesDTO(id, result);
     }
 
     public Member getMemberService(int id) {
-        return membersRepository.findById(id).orElseThrow(MemberNameNotExceptionHandler::new);
+        return membersRepository.findById(id).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.MEMBER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND));
     }
 
     public MemberStatus changeMemberStatus(int id, MemberStatus status) {
@@ -71,7 +71,7 @@ public class MemberService {
                 .map(m -> {
                     m.setActive(status.isActive());
                     return membersRepository.save(m);
-                }).orElseThrow(MemberExceptionHandler::new);
+                }).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.MEMBER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND));
         return new MemberStatus(member.isActive());
     }
 }

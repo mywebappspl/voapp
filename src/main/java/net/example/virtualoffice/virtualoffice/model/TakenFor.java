@@ -1,6 +1,7 @@
 package net.example.virtualoffice.virtualoffice.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.example.virtualoffice.virtualoffice.model.projection.QueueView;
 
@@ -43,31 +44,28 @@ import java.time.LocalDateTime;
         ),
         @SqlResultSetMapping(name = "SqlResultSetMapping.count", columns = @ColumnResult(name = "cnt"))
 })
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "taken_for")
 public class TakenFor {
-
-    public TakenFor() {
-    }
-
-    public TakenFor(final Message message, final int member_id) {
+    public TakenFor(final Message message, final int memberId) {
         this.message = message;
-        this.member_id = member_id;
-        this.queued_on = LocalDateTime.now();
-        this.msg_status = 0;
+        this.memberId = memberId;
+        this.queuedOn = LocalDateTime.now();
+        this.msgStatus = 0;
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int member_id;
+    private int memberId;
     @ManyToOne
     @JoinColumn(name = "message_id")
     private Message message;
-    private int msg_status;
-    private LocalDateTime queued_on;
+    private int msgStatus;
+    private LocalDateTime queuedOn;
     @ManyToOne
     @JoinColumn(name = "member_id", insertable = false, updatable = false)
     private Member member;

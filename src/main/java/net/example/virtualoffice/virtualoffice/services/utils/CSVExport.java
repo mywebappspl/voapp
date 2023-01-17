@@ -6,5 +6,5 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface CSVExport {
-    boolean ExportToCSV(HttpServletResponse servletResponse, int id, List<ReadCompanyMessageForExport> messagesToExport);
+    boolean exportToCSV(HttpServletResponse servletResponse, int id, List<ReadCompanyMessageForExport> messagesToExport);
 }

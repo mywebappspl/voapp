@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface TakenForRepository {
     
-    List<TakenFor> findAllByMessage_Id(Integer message_id);
-    Page<TakenFor> findAllByMember_Id(Integer member_id, Pageable pageable);
+    List<TakenFor> findAllByMessageId(Integer messageId);
+    Page<TakenFor> findAllByMemberId(Integer memberId, Pageable pageable);
     List<TakenFor> findAllMessages(Integer id);
     List<TakenFor> findAllMessagesByDate(Integer id, Date startDate, Date endDate);
     Page<QueueView> findAllFromQueueDTO(Pageable pageable);

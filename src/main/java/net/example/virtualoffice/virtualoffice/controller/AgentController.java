@@ -1,5 +1,6 @@
 package net.example.virtualoffice.virtualoffice.controller;
 
+import lombok.AllArgsConstructor;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.KeycloakRestClient;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.projection.*;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +12,9 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
+@AllArgsConstructor
 public class AgentController {
     private final KeycloakRestClient keycloakRestClient;
-
-    public AgentController(final KeycloakRestClient keycloakRestClient) {
-        this.keycloakRestClient = keycloakRestClient;
-    }
 
     @GetMapping("/agents")
     public List<KeycloakReadUserFromRestDTO> showCustomers() {

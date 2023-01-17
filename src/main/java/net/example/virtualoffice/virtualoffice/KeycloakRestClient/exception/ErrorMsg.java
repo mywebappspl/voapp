@@ -1,12 +1,14 @@
 package net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class ErrorMsg {
-    private String errorMessage;
-    public ErrorMsg(String errorMessage)
-    {
-        this.errorMessage=errorMessage;
-    }
+@Setter
+@AllArgsConstructor
+public class ErrorMsg
+{
+    private String message;
+
 }

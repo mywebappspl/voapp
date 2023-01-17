@@ -11,11 +11,8 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ReadCompanyMessages {
-
     private int companyId;
     private int totalPages;
-
-
     private final long messagesAmount;
     private long currentPage;
     private Set<ReadMessagesDTO> messages;

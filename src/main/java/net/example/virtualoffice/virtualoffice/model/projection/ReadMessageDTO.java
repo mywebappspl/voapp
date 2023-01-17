@@ -18,7 +18,7 @@ public class ReadMessageDTO {
 
     public ReadMessageDTO(final Message message/*, final List<TakenFor> takenFor*/) {
         this.messageId = message.getId();
-        this.messageForCompany = message.getCompany_id();
+        this.messageForCompany = message.getCompanyId();
         this.takenOn = message.getCreatedOn();
         this.content = message.getContent();
         this.members = message.getTakenForMembers().stream().map(m->new ReadMemberBasicInfoDto(m.getMember().getId(),m.getMember().getName(),m.getMember().getEmail(),m.getMember().getPhone(),m.getMember().isActive())).collect(Collectors.toSet());

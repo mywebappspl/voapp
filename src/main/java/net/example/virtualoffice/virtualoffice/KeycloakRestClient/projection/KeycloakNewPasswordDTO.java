@@ -11,7 +11,7 @@ public class KeycloakNewPasswordDTO{
     private String type;
     private String value;
     private boolean temporary;
-    public void ToSave(String value){
+    public void toSave(String value){
         this.type="password";
         this.value=value;
         this.temporary=false;

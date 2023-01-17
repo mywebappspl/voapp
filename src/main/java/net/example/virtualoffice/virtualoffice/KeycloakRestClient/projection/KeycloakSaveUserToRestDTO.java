@@ -31,7 +31,7 @@ public class KeycloakSaveUserToRestDTO {
     private String email;
     private String[] groups;
     private Credentials[] credentials;
-    public KeycloakSaveUserToRestDTO ToSave(KeycloakRestInputUserFromControllerDTO keycloakRestInputUserFromControllerDTO)
+    public KeycloakSaveUserToRestDTO toSave(KeycloakRestInputUserFromControllerDTO keycloakRestInputUserFromControllerDTO)
     {
         this.createdTimestamp= Time.currentTime();
         this.username= keycloakRestInputUserFromControllerDTO.getUsername();

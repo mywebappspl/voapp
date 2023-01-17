@@ -11,8 +11,8 @@ import java.util.Optional;
 public interface MessagesRopository {
     Optional<Message> findById(Integer id);
     Message save(Message Entity);
-    Page<Message> findAllMessagesByCompany_Id(Integer id, Pageable pageable);
-    Page<Message> findAllMessagesWithDatesByCompany_Id(Integer id, Date startDate, Date endDate, Pageable pageable);
-    List<Message> findAllMessagesForExportByCompany_Id(Integer id);
-    List<Message> findAllMessagesWithDatesForExportByCompany_Id(Integer id, Date startDate, Date endDate);
+    Page<Message> findAllMessagesByCompanyId(Integer id, Pageable pageable);
+    Page<Message> findAllMessagesWithDatesByCompanyId(Integer id, Date startDate, Date endDate, Pageable pageable);
+    List<Message> findAllMessagesForExportByCompanyId(Integer id);
+    List<Message> findAllMessagesWithDatesForExportByCompanyId(Integer id, Date startDate, Date endDate);
 }

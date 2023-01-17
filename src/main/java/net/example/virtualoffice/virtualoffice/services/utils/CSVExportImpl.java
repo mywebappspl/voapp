@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 public class CSVExportImpl implements CSVExport {
     @Override
-    public boolean ExportToCSV(HttpServletResponse servletResponse, int id, final List<ReadCompanyMessageForExport> messagesToExport) {
+    public boolean exportToCSV(HttpServletResponse servletResponse, int id, final List<ReadCompanyMessageForExport> messagesToExport) {
 
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateTime = dateFormatter.format(new Date());

@@ -5,20 +5,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.KeycloakRestClient;
-import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.Exceptions;
-import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.ServerExceptions;
+import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.ExceptionMessages;
+import net.example.virtualoffice.virtualoffice.KeycloakRestClient.exception.KeycloakExceptionHandler;
 import net.example.virtualoffice.virtualoffice.KeycloakRestClient.projection.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-
 import java.util.List;
 
-
 @Component
+@AllArgsConstructor
 public class KeycloakRestClientImpl extends KeycloakRestCaller implements KeycloakRestClient {
     KeycloakReadUserFromRestDTO keycloakReadUserFromRestDTO;
     KeycloakSaveUserToRestDTO keycloakSaveUserToRestDTO;
@@ -26,24 +27,22 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
     AdminStateUpdateToRest adminStateUpdateToRest;
     @Value("${keycloakrestclient.admingroup}")
     protected String adming;
+    private static final Logger logger = LoggerFactory.getLogger(KeycloakRestClientImpl.class);
 
-    KeycloakRestClientImpl(final KeycloakReadUserFromRestDTO keycloakReadUserFromRestDTO, final KeycloakSaveUserToRestDTO keycloakSaveUserToRestDTO, final KeycloakNewPasswordDTO keycloakNewPasswordDTO, final AdminStateUpdateToRest adminStateUpdateToRest) {
-        this.keycloakReadUserFromRestDTO = keycloakReadUserFromRestDTO;
-        this.keycloakSaveUserToRestDTO = keycloakSaveUserToRestDTO;
-        this.keycloakNewPasswordDTO = keycloakNewPasswordDTO;
-        this.adminStateUpdateToRest = adminStateUpdateToRest;
-    }
 
     @Override
     public List<KeycloakReadUserFromRestDTO> getAgentsService() {
+
         ResponseEntity<String> res = fetchData("/users");
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             return mapper.readValue(res.getBody(), mapper.getTypeFactory().constructCollectionType(List.class, KeycloakReadUserFromRestDTO.class));
         } catch (JsonMappingException e) {
-            throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonMappingException in getAgentsService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         } catch (JsonProcessingException e) {
-            throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonProcessingException in getAgentsService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -54,22 +53,24 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
         try {
             return mapper.readValue(res.getBody(), KeycloakReadUserFromRestDTO.class);
         } catch (JsonMappingException e) {
-            throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonMappingException in getSingleAgentsService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         } catch (JsonProcessingException e) {
-            throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonProcessingException in getSingleAgentsService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
     public ResponseEntity<String> addAgentService(final KeycloakRestInputUserFromControllerDTO keycloakRestInputUserFromControllerDTO) {
         keycloakRestInputUserFromControllerDTO.setEnabled("true");
-        KeycloakSaveUserToRestDTO data = keycloakSaveUserToRestDTO.ToSave(keycloakRestInputUserFromControllerDTO);
+        KeycloakSaveUserToRestDTO data = keycloakSaveUserToRestDTO.toSave(keycloakRestInputUserFromControllerDTO);
         return saveData("users", data);
     }
 
     @Override
     public ResponseEntity<String> changePasswordService(final String uid, final KeycloakNewPasswordInput keycloakNewPasswordInput) {
-        keycloakNewPasswordDTO.ToSave(keycloakNewPasswordInput.getValue());
+        keycloakNewPasswordDTO.toSave(keycloakNewPasswordInput.getValue());
         return putData("users/" + uid + "/reset-password", keycloakNewPasswordDTO);
     }
 
@@ -93,27 +94,28 @@ public class KeycloakRestClientImpl extends KeycloakRestCaller implements Keyclo
             return putData("users/" + uid + "/groups/" + adming, null);
         }
     }
+
     @Override
-    public AdminStateSetFromInput agentGroupFetchService(final String uid)
-    {
+    public AdminStateSetFromInput agentGroupFetchService(final String uid) {
         ResponseEntity<String> res = fetchData("/users/" + uid + "/groups");
-        String noArray = res.getBody().substring(1,res.getBody().length()-1);
+        String noArray = res.getBody().substring(1, res.getBody().length() - 1);
         AdminStateSetFromInput groupState = new AdminStateSetFromInput();
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             UserGroupDto ug = mapper.readValue(noArray, UserGroupDto.class);
-            if(ug.getName().equals("adming")) {
+            if (ug.getName().equals("adming")) {
                 groupState.setState(true);
                 return groupState;
-            }
-            else {
+            } else {
                 groupState.setState(false);
                 return groupState;
             }
         } catch (JsonMappingException e) {
-           throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonMappingException in agentGroupFetchService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         } catch (JsonProcessingException e) {
-            throw new ServerExceptions(Exceptions.INTERNAL_SERVER_ERROR);
+            logger.error("JsonProcessingException in agentGroupFetchService");
+            throw new KeycloakExceptionHandler(ExceptionMessages.INTERNAL_SERVER_ERROR);
         }
     }
 }

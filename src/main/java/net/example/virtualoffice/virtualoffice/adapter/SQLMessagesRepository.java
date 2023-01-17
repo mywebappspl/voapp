@@ -14,7 +14,7 @@ import java.util.List;
 interface SQLMessagesRepository extends MessagesRopository, JpaRepository<Message,Integer> {
     @Override
     @Query(nativeQuery = true, value = "select * from messages where company_id=:id")
-    Page<Message> findAllMessagesByCompany_Id(@Param("id") Integer id,Pageable pageable);
+    Page<Message> findAllMessagesByCompanyId(@Param("id") Integer id,Pageable pageable);
 
     @Query(nativeQuery = true, value = "select * from messages where company_id=:id")
     List<Message> findAllMessagesForExportByCompany_Id(@Param("id") Integer id);

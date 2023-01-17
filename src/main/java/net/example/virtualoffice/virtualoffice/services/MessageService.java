@@ -1,9 +1,8 @@
 package net.example.virtualoffice.virtualoffice.services;
 
-import net.example.virtualoffice.virtualoffice.Utils.voutils;
-import net.example.virtualoffice.virtualoffice.exception.CompanyExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.DatesExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.MembersNotInCompanyExceptionHandler;
+import net.example.virtualoffice.virtualoffice.Utils.Voutils;
+import net.example.virtualoffice.virtualoffice.exception.CustomExceptionHandler;
+import net.example.virtualoffice.virtualoffice.exception.ExceptionMessages;
 import net.example.virtualoffice.virtualoffice.model.Message;
 import net.example.virtualoffice.virtualoffice.model.TakenFor;
 import net.example.virtualoffice.virtualoffice.model.projection.*;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -42,18 +42,18 @@ public class MessageService {
     public ReadBasicMessageInfoDTO createMessage(WriteMessageDTO source) {
         try {
             if (companiesRepository.existsById(source.getCompanyId())) {
-                List<Integer> members = membersRepository.findByCompanyId(source.getCompanyId()).orElseThrow(MembersNotInCompanyExceptionHandler::new);
+                List<Integer> members = membersRepository.findByCompanyId(source.getCompanyId()).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.MEMBER_NOT_EXIST_IN_COMPANY, HttpStatus.NOT_FOUND));
                 if (!members.containsAll(source.getMembers())) {
-                    throw new MembersNotInCompanyExceptionHandler("not all requested members in company id " + source.getCompanyId());
+                    throw new CustomExceptionHandler(ExceptionMessages.MEMBER_NOT_EXIST_IN_COMPANY, HttpStatus.NOT_FOUND);
                 }
             } else {
-                throw new CompanyExceptionHandler();
+                throw new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND);
             }
 
             Message message = messagesRopository.save(source.bindMessagesWithMembers());
 
             List<MessageForRabbit> MsgList = message.getTakenForMembers().stream()
-                    .map(m -> new MessageForRabbit(m.getId(), m.getMessage().getId(), m.getMember_id()))
+                    .map(m -> new MessageForRabbit(m.getId(), m.getMessage().getId(), m.getMemberId()))
                     .toList();
             for (MessageForRabbit msg : MsgList) {
                 rabbitTemplate.convertAndSend("vo_messages", msg);
@@ -72,10 +72,10 @@ public class MessageService {
     }
 
     public Page<QueueView> getQueuedMessages(Date startDate, Date endDate, Pageable pageable) {
-        if (voutils.LogsDatesValidation(startDate, endDate))
-            return takenForRepository.findAllFromQueueDTOByDate(startDate, Date.from(voutils.EndDateCalculation(endDate)), pageable);
+        if (Voutils.logsDatesValidation(startDate, endDate))
+            return takenForRepository.findAllFromQueueDTOByDate(startDate, Date.from(Voutils.endDateCalculation(endDate)), pageable);
         else
-            throw new DatesExceptionHandler(" Wrong dates");
+            throw new CustomExceptionHandler(ExceptionMessages.INCORRECT_DATES, HttpStatus.BAD_REQUEST);
     }
 
     public Page<QueueView> getQueuedMessages(Pageable pageable) {

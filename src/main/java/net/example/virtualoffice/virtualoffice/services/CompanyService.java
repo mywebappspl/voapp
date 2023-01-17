@@ -1,10 +1,9 @@
 package net.example.virtualoffice.virtualoffice.services;
 
-import net.example.virtualoffice.virtualoffice.Utils.voutils;
-import net.example.virtualoffice.virtualoffice.exception.CompanyExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.CompanyMessagesNotFoundExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.CompanyNameExceptionHandler;
-import net.example.virtualoffice.virtualoffice.exception.ExportToCSVExceptionHandler;
+import lombok.AllArgsConstructor;
+import net.example.virtualoffice.virtualoffice.Utils.Voutils;
+import net.example.virtualoffice.virtualoffice.exception.CustomExceptionHandler;
+import net.example.virtualoffice.virtualoffice.exception.ExceptionMessages;
 import net.example.virtualoffice.virtualoffice.model.Company;
 import net.example.virtualoffice.virtualoffice.model.Member;
 import net.example.virtualoffice.virtualoffice.model.Message;
@@ -15,41 +14,37 @@ import net.example.virtualoffice.virtualoffice.repository.TakenForRepository;
 import net.example.virtualoffice.virtualoffice.services.utils.CSVExport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class CompanyService {
     final private CompaniesRepository companiesRepository;
     final private MessagesRopository messagesRopository;
     final private TakenForRepository takenForRepository;
     final private CSVExport csvExport;
 
-    CompanyService(final CompaniesRepository companiesRepository, final MessagesRopository messagesRopository, final TakenForRepository takenForRepository, final CSVExport csvExport) {
-        this.companiesRepository = companiesRepository;
-        this.messagesRopository = messagesRopository;
-        this.takenForRepository = takenForRepository;
-        this.csvExport = csvExport;
-    }
-
     private boolean isCompanyNameExists(String companyName) {
         return companiesRepository.existsByCompanyName(companyName) != 1;
     }
 
-    private boolean CompanyMessagesExportOrDisplayValidation(int id, Date startDate, Date endDate) {
+    private boolean companyMessagesExportOrDisplayValidation(int id, Date startDate, Date endDate) {
         if (!companiesRepository.existsById(id))
-            throw new CompanyExceptionHandler();
+            throw new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND);
         if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
-            throw new ExportToCSVExceptionHandler(" This endpoint requires two dates for company id: " + id);
+            throw new CustomExceptionHandler(ExceptionMessages.EXPORT_CSV_TWO_DATES_REQUIRED, HttpStatus.BAD_REQUEST);
         }
         if (startDate != null) {
             if (startDate.compareTo(endDate) > 0)
-                throw new ExportToCSVExceptionHandler(" Start date is higher than end date for company id:" + id);
+                throw new CustomExceptionHandler(ExceptionMessages.EXPORT_CSV_FIRST_DATE_LATE, HttpStatus.BAD_REQUEST);
             return true;
         } else {
             return false;
@@ -68,13 +63,16 @@ public class CompanyService {
             company.setMembers(source.getMembers().stream().map(m -> new Member(m.getName(), m.getPhone(), m.getEmail(), company.getId())).collect(Collectors.toSet()));
             return company;
         } else {
-            throw new CompanyNameExceptionHandler();
+            throw new CustomExceptionHandler(ExceptionMessages.COMPANY_NAME_EXISTS, HttpStatus.NOT_FOUND);
         }
     }
 
     public ReadCompanyWithBasicUserInfoDTO readCompany(int id, Boolean active) {
-        Company company = companiesRepository.findById(id).orElseThrow(CompanyExceptionHandler::new);
-        return new ReadCompanyWithBasicUserInfoDTO(company, active);
+        Optional<Company> company = companiesRepository.findById(id);
+        if (company.isPresent())
+            return new ReadCompanyWithBasicUserInfoDTO(company.get(), active);
+        else
+            throw new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND);
     }
 
     public List<?> readAllCompanies(String show, String extended) {
@@ -93,30 +91,29 @@ public class CompanyService {
     public ReadCompanyMessages readMessagesForCompany(int id, Date startDate, Date endDate, Pageable pageable) {
         Page<Message> message;
 
-        if (CompanyMessagesExportOrDisplayValidation(id, startDate, endDate)) {
-
-            message = messagesRopository.findAllMessagesWithDatesByCompany_Id(id, startDate, Date.from(voutils.EndDateCalculation(endDate)), pageable);
+        if (companyMessagesExportOrDisplayValidation(id, startDate, endDate)) {
+            message = messagesRopository.findAllMessagesWithDatesByCompanyId(id, startDate, Date.from(Voutils.endDateCalculation(endDate)), pageable);
         } else {
-            message = messagesRopository.findAllMessagesByCompany_Id(id, pageable);
+            message = messagesRopository.findAllMessagesByCompanyId(id, pageable);
         }
         return new ReadCompanyMessages(id, message);
     }
 
     public boolean exportMessagesForCompany(HttpServletResponse servletResponse, int id, Date startDate, Date endDate) {
         List<ReadCompanyMessageForExport> messagesToExport;
-        if (CompanyMessagesExportOrDisplayValidation(id, startDate, endDate)) {
+        if (companyMessagesExportOrDisplayValidation(id, startDate, endDate)) {
 
             messagesToExport = takenForRepository.
-                    findAllMessagesByDate(id, startDate, Date.from(voutils.EndDateCalculation(endDate)))
+                    findAllMessagesByDate(id, startDate, Date.from(Voutils.endDateCalculation(endDate)))
                     .stream().map(m -> new ReadCompanyMessageForExport(m.getMessage().getCreatedOn(), m.getMessage().getFromName(), m.getMessage().getFromEmail(), m.getMessage().getFromPhone(), m.getMessage().getContent(), m.getMember().getName()))
                     .collect(Collectors.toList());
         } else {
             messagesToExport = takenForRepository.findAllMessages(id).stream().map(m -> new ReadCompanyMessageForExport(m.getMessage().getCreatedOn(), m.getMessage().getFromName(), m.getMessage().getFromEmail(), m.getMessage().getFromPhone(), m.getMessage().getContent(), m.getMember().getName())).collect(Collectors.toList());
         }
         if (messagesToExport.size() == 0) {
-            throw new CompanyMessagesNotFoundExceptionHandler();
+            throw new CustomExceptionHandler(ExceptionMessages.NO_MESSAGES, HttpStatus.NOT_FOUND);
         } else {
-            return csvExport.ExportToCSV(servletResponse, id, messagesToExport);
+            return csvExport.exportToCSV(servletResponse, id, messagesToExport);
         }
     }
 
@@ -130,9 +127,9 @@ public class CompanyService {
                         cmp.setPhone(company.getPhone());
                         cmp.setActive(company.isActive());
                         return companiesRepository.save(cmp);
-                    }).orElseThrow(CompanyExceptionHandler::new);
+                    }).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND));
         } else {
-            throw new CompanyNameExceptionHandler();
+            throw new CustomExceptionHandler(ExceptionMessages.COMPANY_NAME_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -141,14 +138,14 @@ public class CompanyService {
                 .map(m -> {
                     m.setActive(status.isActive());
                     return companiesRepository.save(m);
-                }).orElseThrow(CompanyExceptionHandler::new);
+                }).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND));
         return new CompanyStatus(company.isActive());
     }
 
     public CompanyWithMemberIdAndNameDTO SimplyCompanyInfoWithMemberIdAndName(int id) {
-        Company company = companiesRepository.findById(id).orElseThrow(CompanyExceptionHandler::new);
+        Company company = companiesRepository.findById(id).orElseThrow(() -> new CustomExceptionHandler(ExceptionMessages.COMPANY_WITH_ID_NOT_EXISTS, HttpStatus.NOT_FOUND));
         if (!company.isActive())
-            throw new CompanyExceptionHandler();
+            throw new CustomExceptionHandler(ExceptionMessages.COMPANY_IS_INACTIVE, HttpStatus.BAD_REQUEST);
         return new CompanyWithMemberIdAndNameDTO(company);
     }
 }

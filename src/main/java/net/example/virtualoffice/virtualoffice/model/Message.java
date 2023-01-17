@@ -25,7 +25,7 @@ public class Message {
     private String content;
     private int deliveryType;
     @NotNull
-    private int company_id;
+    private int companyId;
     private LocalDateTime createdOn;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "message")
     Set<TakenFor> takenForMembers;

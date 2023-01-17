@@ -28,7 +28,7 @@ public class WriteMessageDTO {
     private int companyId;
     public Message bindMessagesWithMembers(){
         var message = new Message();
-        message.setCompany_id(companyId);
+        message.setCompanyId(companyId);
         message.setFromName(fromName);
         message.setFromEmail(fromEmail);
         message.setFromPhone(fromPhone);
